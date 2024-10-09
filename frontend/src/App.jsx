@@ -1,10 +1,10 @@
+import Home from './components/Home'
+
 function App() {
 
 
   return (
-    <>
-    <p> Starting building beatSync </p>
-    </>
+    <Home />
   )
 }
 
