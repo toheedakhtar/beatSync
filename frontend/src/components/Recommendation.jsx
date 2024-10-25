@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { songs, songsName } from '../songs'
 import axios from 'axios'
+import SongDisplay from './SongDisplay'
 
 const Recommendation = () => {
 
@@ -12,6 +13,7 @@ const Recommendation = () => {
 
   const [value, setValue] = useState('')
   const [recommends, setRecommend] = useState([])
+  console.log(recommends)
 
   console.log(value)
 
@@ -41,31 +43,34 @@ const Recommendation = () => {
       <form action='POST'>
         <div className='text-white font-semibold text-xl p-2 rounded-md'><h1>Choose a song you vibe with...</h1></div>
 
-        <div className='py-4'>
+        <div className='py-4 w-full flex space-x-2'>
 
-          <Select options={options} className='text-black' onChange={handleSelect} />
+          <Select options={options} className='text-black w-full' onChange={handleSelect} />
+
+          <div>
+            <button className='bg-[#121212] text-green-400 font-semibold py-2 px-2 rounded-md outline hover:bg-green-400 hover:border-black border-3 hover:text-black' onClick={submit}>Recommend</button>
+
+          </div>
 
         </div>
 
-        <div>
-
-          <button className='bg-black text-green-400 font-semibold p-2 rounded-md outline hover:bg-green-400 hover:border-black border-3 hover:text-black' onClick={submit}>Recommend</button>
-
-        </div>
 
       </form>
 
-      <div className='m-2 p-2 h-full text-wrap grid lg:grid-cols-4 md:grid-cols-2'>
-        {Object.entries(recommends).map(([song, url], index) => (
-          <div key={index} className='flex flex-col p-8 m-5'>
-            <img src={url} alt='image' width={250} height={250} className='border-none rounded-md' />
-            <span className='p-2 sm:text-sm md:text-sm lg:text-lg' >{song}</span>
-          </div>
+
+      {recommends && recommends.length > 0 && (
+        <div className="m-2 p-2 h-full text-wrap grid lg:flex flex-wrap justify-center align-center">
+          {recommends.map((song, index) => (
+            <div key={index} className="m-3">
+              <SongDisplay song={song} />
+            </div>
+          ))
+          }
+        </div >
+      )}
 
 
-        ))}
-      </div>
-    </div>
+    </div >
   )
 }
 
