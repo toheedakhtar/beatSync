@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 import { songs, songsName } from '../songs'
 import axios from 'axios'
@@ -11,6 +11,8 @@ const Recommendation = () => {
   }));
 
   const [value, setValue] = useState('')
+  const [recommends, setRecommend] = useState([])
+
   console.log(value)
 
   function handleSelect(e) {
@@ -22,7 +24,11 @@ const Recommendation = () => {
   const submit = async (e) => {
     e.preventDefault()
     try {
-      await axios.post('http://localhost:8000/', { value })
+      const res = await axios.post('http://127.0.0.1:8000/api/song', { value })
+      setRecommend(res.data.slice(1))
+      // console.log(res.data)
+      // setRecommend(res.data)
+      // console.log('Successfully Send',)
     }
     catch (e) {
       console.log(e)
@@ -43,7 +49,14 @@ const Recommendation = () => {
         <div>
           <button className='bg-green-400 text-black font-semibold p-3 rounded-md outline-none' onClick={submit}>Recommend</button>
         </div>
+
       </form>
+
+      <div className='m-2 p-2'>
+        {recommends.map((song, index) => (
+          <li key={index}>{song}</li>
+        ))}
+      </div>
     </div>
   )
 }
