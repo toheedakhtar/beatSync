@@ -14,20 +14,43 @@ df = pickle.load(open('df_data.pkl', 'rb'))
 @app.route("/api/song", methods=['POST'])
 def recommend():
     data = request.get_json()
-    song_idx = df[df['Name'] == data['value']].index.tolist()[0]
 
-    knn = NearestNeighbors(n_neighbors=13, algorithm='auto', metric='cosine') 
-    knn.fit(normalized_data)
-    distances, indices = knn.kneighbors([normalized_data[song_idx]])
-    print(f"\n\n\nSongs recommended for {df['Name'][song_idx]} : \n")
-    for index in indices:
-        song = df['Name'][index].tolist()
-    
-    for i in song:
-        print(i)
-        
-    
-    return data
+
+    try:
+        song_idx = df[df['Name'] == data['value']].index.tolist()[0]
+        knn = NearestNeighbors(n_neighbors=13, algorithm='auto', metric='cosine') 
+        knn.fit(normalized_data)
+        distances, indices = knn.kneighbors([normalized_data[song_idx]])
+        print(f"Songs recommended for {df['Name'].iloc[song_idx]}")
+
+
+        for index in indices:
+            songs = (df['Name'].iloc[index].tolist())
+        # print(songs, '\n\'n')
+        # print(type(songs))
+        if songs:
+            return songs
+        else:
+            return ['There', 'is ', 'an', 'error']
+    except:
+        print('Error')
+        return ['There', 'is ', 'an', 'error']
+
+
+# function to test if all songs are recommending - True
+# def recommend_test():
+#     for i in range(3624):
+#         knn = NearestNeighbors(n_neighbors=13, algorithm='auto', metric='cosine') 
+#         knn.fit(normalized_data)
+#         distances, indices = knn.kneighbors([normalized_data[i]])
+#         print(f"\n\nSongs recommended for {df['Name'].iloc[i]}")
+
+
+#         for index in indices:
+#             songs = (df['Name'].iloc[index].tolist())
+#         print(i, songs, '\n\'n')
+
+
 
 
 
