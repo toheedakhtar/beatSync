@@ -3,15 +3,45 @@ from flask_cors import CORS
 from sklearn.neighbors import NearestNeighbors
 import pickle
 import requests
-from json import loads, dumps, dump
+from concurrent.futures import ThreadPoolExecutor  # For parallel API calls
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 
-
 normalized_data = pickle.load(open('knn_music_data.pkl', 'rb'))
 df = pickle.load(open('df_data.pkl', 'rb'))
 
+# Cache for API responses
+song_cache = {}
+
+def get_song_info(song_name):
+    # Check cache first
+    if song_name in song_cache:
+        return song_cache[song_name]
+    
+    url_data = requests.get(f'https://saavn.dev/api/search/songs?query={song_name}').json()
+    
+    try:
+        song_data = url_data['data']['results'][0]
+        song_dict = {
+            'song_name': song_data['name'],
+            'song_url': song_data['url'],
+            'image_url': song_data['image'][2]['url'],
+            'album_name': song_data['album']['name'],
+            'artist': song_data['artists']['primary'][0]['name'],
+            'year': song_data['year'],
+            'label': song_data['label'],
+            'download_url': song_data['downloadUrl'][-1]['url']
+        }
+        
+        if (len(song_dict['song_name']) > len(song_name)):
+            song_dict['song_name'] = song_name
+
+        # Cache the song info for future requests
+        song_cache[song_name] = song_dict
+        return song_dict
+    except:
+        return "Bad Response"
 
 @app.route("/api/song", methods=['POST'])
 def recommend():
@@ -22,79 +52,20 @@ def recommend():
         knn = NearestNeighbors(n_neighbors=13, algorithm='auto', metric='cosine') 
         knn.fit(normalized_data)
         distances, indices = knn.kneighbors([normalized_data[song_idx]])
-        # print(f"Songs recommended for {df['Name'].iloc[song_idx]}")
 
-
-        for index in indices:
-            songs = (df['Name'].iloc[index].tolist())
+        # Gather song names to fetch info
+        song_names = df['Name'].iloc[indices[0]].tolist()
         
+        # Fetch data in parallel
+        with ThreadPoolExecutor() as executor:
+            songs_dict_arr = list(executor.map(get_song_info, song_names))
 
-        songs_dict_arr = []
-
-        for song in songs:
-            songs_dict = get_song_info(song)
-            if songs_dict !=  "Bad Response":
-                songs_dict_arr.append(songs_dict)
-        
-        print(f'\n\n\song-dict-arr : \n{songs_dict_arr}\n\n')
-
-        try:
-            # print(songs_dict_arr)
-            return songs_dict_arr
-        except:
-            print('cant serialize')
-
-    except:
-        print('Error')
-        return ['', 'There', 'is ', 'an', 'error']
-    
-# make the songs_dict_arr serializable to send to frontend as json
-def make_serializable(obj):
-    if isinstance(obj, set):  # Convert sets to lists
-        return list(obj)
-    elif isinstance(obj, dict):  # Process nested dictionaries
-        return {k: make_serializable(v) for k, v in obj.items()}
-    elif isinstance(obj, list):  # Process nested lists
-        return [make_serializable(elem) for elem in obj]
-    else:
-        return obj
-
-
-def get_song_info(song_name):
-    url_data = requests.get(f'https://saavn.dev/api/search/songs?query={song_name}').json()
-   
-    # for testing
-    # url_data = loads(json_data)
-    # if(url_data['success'] == True)
-    try:
-        song_name_data = url_data['data']['results'][0]['name']
-        song_url = url_data['data']['results'][0]['url']
-        image_url = url_data['data']['results'][0]['image'][2]['url']
-        album_name = url_data['data']['results'][0]['album']['name']
-        artist = url_data['data']['results'][0]['artists']['primary'][0]['name']
-        year = url_data['data']['results'][0]['year']
-        label = url_data['data']['results'][0]['label']
-        download_url = url_data['data']['results'][0]['downloadUrl'][-1]['url']
-
-        if (len(song_name_data) > len(song_name)): song_name_data=song_name 
-
-        song_dict = {
-            'song_name' : song_name_data,
-            'song_url' : song_url,
-            'image_url' : image_url,
-            'album_name' : album_name,
-            'artist' : artist,
-            'year' : year,
-            'label' : label,
-            'download_url' : download_url
-        }
-        print(song_dict)
-        return song_dict
-    except:
-        return 'Bad Response'
-        
-
-
+        # Remove unsuccessful responses
+        songs_dict_arr = [song for song in songs_dict_arr if song != "Bad Response"]
+        return jsonify(songs_dict_arr)
+    except Exception as e:
+        print('Error:', e)
+        return jsonify(['Error occurred during recommendation'])
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
