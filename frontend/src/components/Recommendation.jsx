@@ -48,6 +48,36 @@ const Recommendation = () => {
     }
   }
 
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: '#000000', // Black background
+      border: 'none',
+      boxShadow: state.isFocused ? 'none' : 'none', // Removes outline
+      '&:hover': { borderColor: '#1DB954' },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: '#000000', // Black background for the dropdown
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#1DB954' : '#000000', // Dark gray on hover
+      color: 'white', // Spotify green text
+      '&:hover': { backgroundColor: '#1DB954' },
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: 'white', // Spotify green text for selected option
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: 'white', // Spotify green text for placeholder
+    }),
+  };
+
+
+
 
 
   return (
@@ -59,7 +89,7 @@ const Recommendation = () => {
 
         <div className='py-4 w-full flex space-x-2'>
 
-          <Select options={options} className='text-black w-full' onChange={handleSelect} />
+          <Select options={options} className='text-black w-full' onChange={handleSelect} styles={customStyles} />
 
         </div>
         <div className=''>
