@@ -10,22 +10,19 @@ import 'react-loading-skeleton/dist/skeleton.css'
 const Recommendation = () => {
 
   const options = songs.map((song) => ({
-    value: song,   // Set the song name as the value
-    label: song    // Set the song name as the label
+    value: song,
+    label: song
   }));
 
   const [value, setValue] = useState('')
   const [isValid, setIsValid] = useState(false);
   const [loading, isLoading] = useState(false)
   const [recommends, setRecommend] = useState([])
-  // console.log(recommends)
 
-  console.log(value)
 
   function handleSelect(e) {
     setValue(e.value)
     setIsValid(e.value ? true : false);
-    // console.log(e.value)
   }
 
 
@@ -33,15 +30,11 @@ const Recommendation = () => {
     e.preventDefault()
     try {
       isLoading(true)
-
-      const res = await axios.post('http://127.0.0.1:8000/api/song', { value })
-      // setTimeout(() => {
-      console.log(res.data)
+      console.log(value)
+      const res = await axios.post('https://beatsync.onrender.com//api/song', { value })
       setRecommend(res.data)
       { isLoading(false) }
-      // }, 3000)
 
-      // console.log('Successfully Send',)
     }
     catch (e) {
       console.log(e)
@@ -62,17 +55,17 @@ const Recommendation = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? '#1DB954' : '#000000', // Dark gray on hover
-      color: 'white', // Spotify green text
+      backgroundColor: state.isFocused ? '#1DB954' : '#000000',
+      color: 'white',
       '&:hover': { backgroundColor: '#1DB954' },
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: 'white', // Spotify green text for selected option
+      color: 'white',
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: 'white', // Spotify green text for placeholder
+      color: 'white',
     }),
   };
 

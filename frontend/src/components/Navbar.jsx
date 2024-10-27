@@ -6,7 +6,7 @@ const Navbar = () => {
 
     <div className='flex flex-row justify-around border-none rounded-lg'>
       <div>
-        <img src="src/assets/logo.png" alt='beatSync' height={100} width={100} className='rounded-sm p-1' />
+        <img src="logo.png" alt='beatSync' height={100} width={100} className='rounded-sm p-1' />
       </div>
       {/* <div className='font-bold text-2xl font-serif text-green-400 px-5 flex items-center'>beatSync
       </div> */}
