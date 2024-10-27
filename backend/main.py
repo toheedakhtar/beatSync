@@ -14,6 +14,12 @@ df = pickle.load(open('df_data.pkl', 'rb'))
 # Cache for API responses
 song_cache = {}
 
+@app.route("/")
+def home():
+    return 'BACKEND FOR beatSync'
+
+
+
 def get_song_info(song_name):
     # Check cache first
     if song_name in song_cache:
