@@ -74,4 +74,4 @@ def recommend():
         return jsonify(['Error occurred during recommendation'])
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
